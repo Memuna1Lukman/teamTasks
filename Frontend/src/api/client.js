@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'https://teamtasks-raw.vercel.app/'
+const API_URL = import.meta.env.VITE_API_URL ?? 'https://teamtasks-raw.vercel.app'
 
 export async function apiClient(path, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
