@@ -1,17 +1,17 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum, UniqueConstraint,Boolean,Text
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum as SQLAlchemyEnum, UniqueConstraint,Boolean,Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 import enum
 
-class TaskStatus(str, Enum):
+class TaskStatus(str, enum.Enum):
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     REVIEW = "REVIEW"
     DONE = "DONE"
  
  
-class TaskPriority(str, Enum):
+class TaskPriority(str, enum.Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -30,10 +30,10 @@ class Users(Base):
 
     # relationships
 
-    assigned_tasks = relationship("Task", foreign_keys="[Task.assigned_to_user_id]", back_populates="assigned_to")
-    created_tasks = relationship("Task", foreign_keys="[Task.created_by_user_id]", back_populates="created_by")
-    comments = relationship("Comment", back_populates="author", cascade="all, delete-orphan")
-    attachments = relationship("Attachment", back_populates="uploaded_by", cascade="all, delete-orphan")
+    assigned_tasks = relationship("Tasks", foreign_keys="[Tasks.assigned_to_user_id]", back_populates="assigned_to")
+    created_tasks = relationship("Tasks", foreign_keys="[Tasks.created_by_user_id]", back_populates="created_by")
+    comments = relationship("Comments", back_populates="author", cascade="all, delete-orphan")
+    attachments = relationship("Attachments", back_populates="uploaded_by", cascade="all, delete-orphan")
 
 
 class Tasks(Base):
@@ -42,8 +42,8 @@ class Tasks(Base):
     id = Column(Integer, primary_key=True)
     title =  Column(String,nullable=False)
     description = Column(String,nullable=True,default=None)
-    status = Column(Enum(TaskStatus), nullable=False, default=TaskStatus.TODO,index=True)
-    priority = Column(Enum(TaskPriority),nullable=False, default=TaskPriority.MEDIUM)
+    status = Column(SQLAlchemyEnum(TaskStatus), nullable=False, default=TaskStatus.TODO,index=True)
+    priority = Column(SQLAlchemyEnum(TaskPriority),nullable=False, default=TaskPriority.MEDIUM)
     assigned_to_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     created_by_user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     due_date = Column(DateTime(timezone=True), nullable=True, default=None)
@@ -56,7 +56,7 @@ class Tasks(Base):
     assigned_to = relationship("Users",back_populates="assigned_tasks",foreign_keys=[assigned_to_user_id])
     created_by = relationship("Users",back_populates="created_tasks",foreign_keys=[created_by_user_id]) 
     comments = relationship("Comments",back_populates="task",cascade="all,delete-orphan")
-    attachments = relationship("Attachment", back_populates="task", cascade="all, delete-orphan")
+    attachments = relationship("Attachments", back_populates="task", cascade="all, delete-orphan")
 
 
 class Comments(Base):
@@ -85,5 +85,5 @@ class Attachments(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
  
     # Relationships
-    task = relationship("Task", back_populates="attachments")
-    uploaded_by = relationship("User", back_populates="attachments")      
+    task = relationship("Tasks", back_populates="attachments")
+    uploaded_by = relationship("Users", back_populates="attachments")

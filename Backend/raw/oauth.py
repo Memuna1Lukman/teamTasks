@@ -56,7 +56,7 @@ def get_current_user(token:str=Depends(oauth2_scheme),db:Session=Depends(get_db)
     if not token:
         raise credential_exception
     token=verify_token(token,credential_exception)
-    user = db.query(models.User).filter(models.User.id==token.id).first()
+    user = db.query(models.Users).filter(models.Users.id == token.id).first()
     if user is None:
         raise credential_exception
     return user

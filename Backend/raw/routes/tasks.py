@@ -39,8 +39,8 @@ def create_tasks(task:schemas.CreateTasks,db:Session = Depends(get_db),current_u
 @router.get("/",response_model=List[schemas.AddTasks])
 def get_all_tasks(db:Session = Depends(get_db),current_user:models.Users = Depends(oauth.get_current_user)):
     # check if there are any task
-    task = db.query(models.Task).filter(models.Tasks.deleted_at.is_(None)).all()
-    return task
+    tasks = db.query(models.Tasks).filter(models.Tasks.deleted_at.is_(None)).all()
+    return tasks
 
 
 @router.get("/{id}",response_model=schemas.AddTasks)
@@ -53,12 +53,16 @@ def get_one_task(id:int,db:Session = Depends(get_db),current_user:models.Users =
 
 
 @router.patch("/{id}",response_model=schemas.AddTasks)
-def update_one_task(task:schemas.CreateTasks,id:int,db:Session = Depends(get_db),current_user:models.Users = Depends(oauth.get_current_user)):
+def update_one_task(update: schemas.UpdateTask, id:int,db:Session = Depends(get_db),current_user:models.Users = Depends(oauth.get_current_user)):
     # make sure the task id exist
     task = db.query(models.Tasks).filter(models.Tasks.id == id, models.Tasks.deleted_at.is_(None)).first()
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Not Found")
-    update_data  = task.model_dump(exclude_unset=True)
+    update_data = update.model_dump(exclude_unset=True)
+    if "assigned_to_user_id" in update_data and update_data["assigned_to_user_id"] is not None:
+        assignee = db.query(models.Users).filter(models.Users.id == update_data["assigned_to_user_id"]).first()
+        if not assignee:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignee not found")
     for key, value in update_data.items():
         setattr(task, key, value)
     try:
@@ -89,7 +93,7 @@ def delete_task(id:int,db:Session = Depends(get_db),current_user:models.Users = 
     return
 
 @router.patch("/{id}/complete", response_model=schemas.AddTasks)
-def complete_task(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth.get_current_user)):
+def complete_task(id: int, db: Session = Depends(get_db), current_user: models.Users = Depends(oauth.get_current_user)):
     task = db.query(models.Tasks).filter(models.Tasks.id == id, models.Tasks.deleted_at.is_(None)).first()
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")

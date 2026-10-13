@@ -15,8 +15,8 @@ router = APIRouter(
 @router.post("/", response_model=schemas.UserOut, status_code=status.HTTP_201_CREATED)
 def create_users (user:schemas.UserCreate,db:Session = Depends(get_db)):
     new_user = user.model_dump()  # make the user a dict
-    new_user["password"] = utils.get_password_hash()
-    new_user_obj = models.User(**new_user)
+    new_user["password"] = utils.get_password_hash(new_user["password"])
+    new_user_obj = models.Users(**new_user)
     try:
         db.add(new_user_obj)
         db.commit()
@@ -43,4 +43,3 @@ def get_one_user(id:int,db:Session = Depends(get_db),current_user:models.Users =
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Not Found")
     return user
-

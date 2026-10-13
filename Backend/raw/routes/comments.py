@@ -14,7 +14,7 @@ router = APIRouter(tags=["Comments"], prefix="/tasks/{task_id}/comments")
 
 
 @router.get("/",response_model=List[schemas.CommentOut])
-def get_comments(task_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth.get_current_user)):
+def get_comments(task_id: int, db: Session = Depends(get_db), current_user: models.Users = Depends(oauth.get_current_user)):
     
     query_task = db.query(models.Tasks).filter(models.Tasks.id == task_id).first()
     if not query_task:
@@ -29,13 +29,14 @@ def get_comments(task_id: int, db: Session = Depends(get_db), current_user: mode
 
 
 @router.post("/",response_model=schemas.CommentOut, status_code=status.HTTP_201_CREATED)
-def create_comment(comment: schemas.CommentCreate,task_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth.get_current_user)):
+def create_comment(comment: schemas.CommentCreate,task_id: int, db: Session = Depends(get_db), current_user: models.Users = Depends(oauth.get_current_user)):
     
     query_task = db.query(models.Tasks).filter(models.Tasks.id == task_id).first()
     if not query_task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"The task is not found")
-    comments = comment.model_dump()
-    new_comment = models.Comment(
+    if comment.task_id is not None and comment.task_id != task_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="task_id must match the URL")
+    new_comment = models.Comments(
         task_id=task_id,
         author_user_id=current_user.id,
         body=comment.body,

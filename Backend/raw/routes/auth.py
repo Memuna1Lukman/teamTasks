@@ -38,7 +38,7 @@ def login_user(
 
 
 
-@router.post("/")
+@router.post("/logout")
 def logout_user (
     response:Response
 ):
@@ -55,5 +55,5 @@ def logout_user (
 
 
 @router.get("/me", response_model=schemas.UserOut)
-def get_me(current_user: models.User = Depends(oauth.get_current_user)):
+def get_me(current_user: models.Users = Depends(oauth.get_current_user)):
     return current_user
