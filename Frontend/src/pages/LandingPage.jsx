@@ -42,6 +42,20 @@ const testimonials = [
   },
 ]
 
+const heroTasks = [
+  { label: 'Design', title: 'Polish the launch page', meta: 'Today · 3 comments', tone: 'blue' },
+  { label: 'Planning', title: 'Share the campaign brief', meta: 'Tomorrow · 2 members', tone: 'violet' },
+  { label: 'Complete', title: 'Set the launch date', meta: 'Done · Team approved', tone: 'green' },
+]
+
+function TestimonialCard({ testimonial }) {
+  return <figure className="testimonial">
+    <div className="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+    <blockquote>“{testimonial.quote}”</blockquote>
+    <figcaption><span className={`testimonial-avatar ${testimonial.tone}`}>{testimonial.initials}</span><span><strong>{testimonial.name}</strong><small>{testimonial.role}</small></span></figcaption>
+  </figure>
+}
+
 export default function LandingPage({ onSignIn, onSignUp }) {
   return (
     <main className="landing-page">
@@ -80,7 +94,14 @@ export default function LandingPage({ onSignIn, onSignUp }) {
               <div className="board-column"><div className="column-title"><strong>Done</strong><span>•••</span></div><div className="board-card"><b className="card-label green" /><strong>Choose a launch date</strong><small>☷ 2&nbsp;&nbsp; ✓ Complete</small></div><div className="add-card">＋ Add a card</div></div>
             </div>
           </div>
-          <div className="floating-card"><span className="floating-icon">✓</span><div><strong>Great teamwork.</strong><small>Everything in one place.</small></div></div>
+          <div className="hero-card-stack" aria-label="Tasks move through the workflow">
+            {heroTasks.map((task, index) => <article className={`hero-task-card hero-task-${index + 1}`} key={task.title}>
+              <span className={`hero-task-label ${task.tone}`}>{task.label}</span>
+              <strong>{task.title}</strong>
+              <small>{task.meta}</small>
+              <span className="hero-task-avatar">{index === 2 ? '✓' : index === 1 ? 'PS' : 'MC'}</span>
+            </article>)}
+          </div>
         </div>
       </section>
 
@@ -94,12 +115,15 @@ export default function LandingPage({ onSignIn, onSignUp }) {
           <p className="eyebrow">LOVED BY BUSY TEAMS</p>
           <h2 id="testimonials-title">Less busywork.<br /><em>More momentum.</em></h2>
         </div>
-        <div className="testimonial-grid">
-          {testimonials.map((testimonial) => <figure className="testimonial" key={testimonial.name}>
-            <div className="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
-            <blockquote>“{testimonial.quote}”</blockquote>
-            <figcaption><span className={`testimonial-avatar ${testimonial.tone}`}>{testimonial.initials}</span><span><strong>{testimonial.name}</strong><small>{testimonial.role}</small></span></figcaption>
-          </figure>)}
+        <div className="testimonial-marquee" aria-label="Customer testimonials">
+          <div className="testimonial-track">
+            <div className="testimonial-set">
+              {testimonials.map((testimonial) => <TestimonialCard testimonial={testimonial} key={testimonial.name} />)}
+            </div>
+            <div className="testimonial-set" aria-hidden="true">
+              {testimonials.map((testimonial) => <TestimonialCard testimonial={testimonial} key={`duplicate-${testimonial.name}`} />)}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -116,7 +140,7 @@ export default function LandingPage({ onSignIn, onSignUp }) {
       </section>
 
       <footer className="landing-footer">
-        <div className="footer-main"><div><span className="brand"><span className="brand-mark" aria-hidden="true"><span /></span><span>taskflow</span></span><p>Less juggling. More doing.</p></div><div className="footer-links"><div><strong>Product</strong><a href="#how-it-works">How it works</a><a href="#top">Features</a></div><div><strong>Company</strong><a href="#testimonials-title">Our customers</a><a href="#cta-title">Get started</a></div><div><strong>Connect</strong><a href="mailto:hello@taskflow.app">Contact us</a><a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a></div></div></div>
+        <div className="footer-main"><div><span className="brand"><span className="brand-mark" aria-hidden="true"><span /></span><span className='span'>taskflow</span></span><p>Less juggling. More doing.</p></div><div className="footer-links"><div><strong>Product</strong><a href="#how-it-works">How it works</a><a href="#top">Features</a></div><div><strong>Company</strong><a href="#testimonials-title">Our customers</a><a href="#cta-title">Get started</a></div><div><strong>Connect</strong><a href="mailto:hello@taskflow.app">Contact us</a><a href="https://twitter.com" target="_blank" rel="noreferrer">Twitter</a></div></div></div>
         <div className="footer-bottom"><span>© 2024 Taskflow. Built for better days.</span><span>Made with intention.</span></div>
       </footer>
     </main>
