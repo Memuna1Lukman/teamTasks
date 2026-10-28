@@ -39,7 +39,12 @@ def create_tasks(task:schemas.CreateTasks,db:Session = Depends(get_db),current_u
 @router.get("/",response_model=List[schemas.AddTasks])
 def get_all_tasks(db:Session = Depends(get_db),current_user:models.Users = Depends(oauth.get_current_user)):
     # check if there are any task
-    tasks = db.query(models.Tasks).filter(models.Tasks.deleted_at.is_(None)).all()
+    tasks = db.query(models.Tasks).filter(
+    (models.Tasks.created_by_user_id == current_user.id) | 
+    (models.Tasks.assigned_to_user_id == current_user.id),
+    models.Tasks.deleted_at.is_(None)
+).all()
+
     return tasks
 
 
